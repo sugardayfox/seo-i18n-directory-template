@@ -1,0 +1,107 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SearchBar from '../../components/SearchBar.astro';
+import TagFilter from '../../components/TagFilter.astro';
+import DirectoryCard from '../../components/DirectoryCard.astro';
+import { getCollection } from 'astro:content';
+
+const directoryItems = await getCollection('directory');
+const allTags = [...new Set(directoryItems.flatMap(item => item.data.tags))].sort();
+---
+
+<Layout title="Directory">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-4xl font-bold mb-12">Directory</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Left Sidebar -->
+      <div class="lg:col-span-1 space-y-8">
+        <SearchBar value="" onChange="updateDirectory" />
+        <TagFilter
+          tags={allTags}
+          selectedTags={[]}
+          onChange="updateDirectory"
+        />
+      </div>
+
+      <!-- Directory Items Grid -->
+      <div class="lg:col-span-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="directoryGrid">
+          {directoryItems.map(item => (
+            <DirectoryCard
+              title={item.data.title}
+              description={item.data.description}
+              tags={item.data.tags}
+              slug={item.slug}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  let items = [];
+  let searchTerm = '';
+  let selectedTags = [];
+
+  // Fetch directory items on load
+  async function fetchDirectoryItems() {
+    const response = await fetch('/api/directory');
+    items = await response.json();
+    filterItems();
+  }
+
+  // Filter items based on search and tags
+  function filterItems() {
+    const filteredItems = items.filter(item => {
+      const matchesSearch = item.data.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          item.data.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || 
+                         selectedTags.every(tag => item.data.tags.includes(tag));
+      return matchesSearch && matchesTags;
+    });
+
+    updateGrid(filteredItems);
+  }
+
+  // Update the grid with filtered items
+  function updateGrid(filteredItems) {
+    const grid = document.getElementById('directoryGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = filteredItems.map(item => `
+      <article class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-2">
+            <a href="/directory/${item.slug}" class="hover:text-primary">
+              ${item.data.title}
+            </a>
+          </h3>
+          <p class="text-gray-600 mb-4">${item.data.description}</p>
+          <div class="flex flex-wrap gap-2">
+            ${item.data.tags.map(tag => `
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+                ${tag}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // Event listeners
+  document.addEventListener('updateDirectory', (e) => {
+    if (typeof e.detail === 'string') {
+      searchTerm = e.detail;
+    } else if (Array.isArray(e.detail)) {
+      selectedTags = e.detail;
+    }
+    filterItems();
+  });
+
+  // Initialize
+  fetchDirectoryItems();
+</script>

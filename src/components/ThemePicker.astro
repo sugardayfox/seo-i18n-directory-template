@@ -1,0 +1,36 @@
+---
+const themes = [
+  { id: 'default', name: 'Blue' },
+  { id: 'green', name: 'Green' },
+  { id: 'purple', name: 'Purple' },
+  { id: 'gray', name: 'Gray' },
+  { id: 'dark', name: 'Dark' }
+];
+---
+
+<div class="relative inline-block text-left">
+  <select
+    id="theme-picker"
+    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+  >
+    {themes.map(theme => (
+      <option value={theme.id}>{theme.name}</option>
+    ))}
+  </select>
+</div>
+
+<script>
+  const themePicker = document.getElementById('theme-picker') as HTMLSelectElement;
+  
+  // Set initial theme from localStorage or default
+  const savedTheme = localStorage.getItem('theme') || 'default';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  themePicker.value = savedTheme;
+  
+  themePicker?.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement;
+    const newTheme = target.value;
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+</script>

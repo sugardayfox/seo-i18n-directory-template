@@ -1,0 +1,43 @@
+---
+interface Props {
+  tags: string[];
+  selectedTags: string[];
+  onChange: string;
+}
+
+const { tags, selectedTags, onChange } = Astro.props;
+---
+
+<div class="space-y-2">
+  <h3 class="font-semibold text-lg">Filter by Tags</h3>
+  <div class="space-y-2">
+    {tags.map(tag => (
+      <label class="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          value={tag}
+          checked={selectedTags.includes(tag)}
+          class="rounded text-primary focus:ring-primary"
+        />
+        <span class="text-gray-700">{tag}</span>
+      </label>
+    ))}
+  </div>
+</div>
+
+<script define:vars={{ onChange }}>
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const selectedTags = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+      
+      const event = new CustomEvent(onChange, {
+        detail: selectedTags,
+        bubbles: true
+      });
+      checkbox.dispatchEvent(event);
+    });
+  });
+</script>

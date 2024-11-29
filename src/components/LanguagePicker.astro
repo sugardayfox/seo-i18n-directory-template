@@ -1,0 +1,32 @@
+---
+import { languages } from '../i18n/ui';
+import { getLangFromUrl } from '../utils/i18n';
+
+const currentLang = getLangFromUrl(Astro.url);
+---
+
+<div class="relative inline-block text-left">
+  <select
+    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+    id="language-picker"
+  >
+    {Object.entries(languages).map(([lang, label]) => (
+      <option value={lang} selected={currentLang === lang}>
+        {label}
+      </option>
+    ))}
+  </select>
+</div>
+
+<script>
+  const languagePicker = document.getElementById('language-picker') as HTMLSelectElement;
+  
+  languagePicker?.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement;
+    const newLang = target.value;
+    const currentPath = window.location.pathname;
+    const [, currentLang, ...rest] = currentPath.split('/');
+    const newPath = `/${newLang}/${rest.join('/')}`;
+    window.location.href = newPath;
+  });
+</script>

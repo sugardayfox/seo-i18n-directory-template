@@ -1,0 +1,93 @@
+---
+import LanguagePicker from './LanguagePicker.astro';
+import SearchWidget from './SearchWidget.astro';
+
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Directory', href: '/directory' },
+  { label: 'Blog', href: '/blog' },
+];
+---
+
+<nav class="bg-background shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between h-16">
+      <div class="flex">
+        <div class="flex-shrink-0 flex items-center">
+          <a href="/" class="block">
+            <img 
+              src="/logo.svg" 
+              alt="Directory Logo" 
+              class="h-8 w-auto"
+              width="160"
+              height="40"
+            />
+          </a>
+        </div>
+        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+          {navItems.map(item => (
+            <a
+              href={item.href}
+              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-text-light hover:text-primary"
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <SearchWidget />
+        <LanguagePicker />
+        
+        <div class="sm:hidden">
+          <button
+            type="button"
+            class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-text-light hover:text-primary hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+            aria-controls="mobile-menu"
+            aria-expanded="false"
+          >
+            <span class="sr-only">Open main menu</span>
+            <svg
+              class="block h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:hidden hidden" id="mobile-menu">
+    <div class="pt-2 pb-3 space-y-1">
+      {navItems.map(item => (
+        <a
+          href={item.href}
+          class="block pl-3 pr-4 py-2 text-base font-medium text-text-light hover:text-primary hover:bg-primary-light/10"
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</nav>
+
+<script>
+  const mobileMenuButton = document.querySelector('.mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuButton?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>

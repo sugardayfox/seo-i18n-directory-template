@@ -1,0 +1,29 @@
+---
+interface Props {
+  value: string;
+  onChange: string;
+}
+
+const { value, onChange } = Astro.props;
+---
+
+<div class="relative">
+  <input
+    type="search"
+    id="directorySearch"
+    name="search"
+    value={value}
+    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+    placeholder="Search directory..."
+  />
+  <script define:vars={{ onChange }}>
+    const searchInput = document.getElementById('directorySearch');
+    searchInput.addEventListener('input', (e) => {
+      const event = new CustomEvent(onChange, { 
+        detail: e.target.value,
+        bubbles: true 
+      });
+      searchInput.dispatchEvent(event);
+    });
+  </script>
+</div>

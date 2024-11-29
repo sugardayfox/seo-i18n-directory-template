@@ -1,0 +1,109 @@
+---
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import SearchResults from './SearchResults.astro';
+import { useTranslations, getLangFromUrl } from '../utils/i18n';
+
+interface Props {
+  className?: string;
+}
+
+const { className = '' } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class={`relative ${className}`}>
+  <button
+    type="button"
+    id="search-button"
+    class="p-2 text-gray-600 hover:text-primary rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+    aria-label={t('search.button')}
+  >
+    <MagnifyingGlassIcon className="w-5 h-5" />
+  </button>
+</div>
+
+<dialog id="search-dialog" class="fixed inset-0 z-50 bg-gray-900/75 w-full h-full p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl mx-auto mt-16 p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">{t('search.title')}</h2>
+      <button
+        type="button"
+        class="text-gray-400 hover:text-gray-500"
+        id="close-search"
+        aria-label={t('search.close')}
+      >
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <form id="search-form" class="mb-4">
+      <div class="relative">
+        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="search"
+          id="search-input"
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          placeholder={t('search.placeholder')}
+          autocomplete="off"
+        />
+      </div>
+    </form>
+
+    <div id="search-results" class="space-y-4 max-h-96 overflow-y-auto">
+      <SearchResults />
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { performSearch } from '../utils/search';
+
+  const searchButton = document.getElementById('search-button');
+  const searchDialog = document.getElementById('search-dialog') as HTMLDialogElement;
+  const closeButton = document.getElementById('close-search');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchResults = document.getElementById('search-results');
+  const searchForm = document.getElementById('search-form');
+
+  let searchTimeout: NodeJS.Timeout;
+
+  searchButton?.addEventListener('click', () => {
+    searchDialog?.showModal();
+    searchInput?.focus();
+  });
+
+  closeButton?.addEventListener('click', () => {
+    searchDialog?.close();
+  });
+
+  searchDialog?.addEventListener('click', (e) => {
+    if (e.target === searchDialog) {
+      searchDialog.close();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchDialog?.open) {
+      searchDialog.close();
+    }
+  });
+
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (searchResults) {
+        performSearch(searchInput.value, searchResults);
+      }
+    }, 300);
+  });
+
+  searchForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (searchResults) {
+      performSearch(searchInput.value, searchResults);
+    }
+  });
+</script>
