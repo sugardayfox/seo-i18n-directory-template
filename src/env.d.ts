@@ -1,11 +1,11 @@
-/// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
-declare module 'astro:content' {
-  interface Render {
-    '.mdx': Promise<{
-      Content: import('astro').MarkdownInstance<{}>['Content'];
-      headings: import('astro').MarkdownHeading[];
-      remarkPluginFrontmatter: Record<string, any>;
-    }>;
-  }
+/// <reference path="../.astro/types.d.ts" />
+
+interface ImportMetaEnv {
+  readonly PUBLIC_SUPABASE_URL: string;
+  readonly PUBLIC_SUPABASE_ANON_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }

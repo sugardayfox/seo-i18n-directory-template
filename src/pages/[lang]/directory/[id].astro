@@ -6,12 +6,12 @@ import { supabase } from '../../../utils/supabase';
 import type { DirectoryItem } from '../../../utils/supabase';
 
 export async function getStaticPaths() {
-  const { data: items } = await supabase
+  const { data: items = [] } = await supabase
     .from('directory_items')
     .select('id, lang');
 
-  return (items || []).flatMap(item => 
-    Object.keys(languages).map(lang => ({
+  return Object.keys(languages).flatMap(lang => 
+    (items || []).map(item => ({
       params: { lang, id: item.id }
     }))
   );
@@ -21,14 +21,14 @@ const { id } = Astro.params;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const { data: item } = await supabase
+const { data: item, error } = await supabase
   .from('directory_items')
   .select('*')
   .eq('id', id)
   .single();
 
-if (!item) {
-  return Astro.redirect(`/${lang}/404`);
+if (error || !item) {
+  return Astro.redirect(`/${lang}/error`);
 }
 ---
 
