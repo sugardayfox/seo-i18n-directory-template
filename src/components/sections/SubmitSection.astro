@@ -1,0 +1,20 @@
+---
+import { getLangFromUrl, useTranslations } from '../../utils/i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<section class="py-16 bg-gray-900 text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl font-bold mb-4">{t('submit.title')}</h2>
+    <p class="text-xl text-gray-300 mb-8">{t('submit.subtitle')}</p>
+    <button
+      type="button"
+      data-open-modal
+      class="inline-block bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+    >
+      {t('submit.button')}
+    </button>
+  </div>
+</section>

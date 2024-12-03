@@ -1,7 +1,3 @@
-==BEWARE==
-
-Heavily Work in progress, no working release ATM.
-
 # Directory Website
 
 A multilingual directory website built with Astro, React, and Supabase.

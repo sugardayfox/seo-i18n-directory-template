@@ -1,53 +1,27 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import DirectoryItemCard from '../../components/DirectoryItemCard.astro';
+import SubmitSection from '../../components/sections/SubmitSection.astro';
+import FAQSection from '../../components/sections/FAQSection.astro';
+import BlogSection from '../../components/sections/BlogSection.astro';
+import ListingModal from '../../components/ListingModal.astro';
 import { getLangFromUrl, useTranslations } from '../../utils/i18n';
 import { languages } from '../../i18n/ui';
-import { getDirectoryItems, getBlogPosts } from '../../utils/supabase';
-import ListingModal from '../../components/ListingModal.astro';
-import type { DirectoryItem, BlogPost } from '../../utils/supabase';
+import { supabase } from '../../utils/supabase';
 
 export async function getStaticPaths() {
-  return Object.keys(languages).map(lang => ({
-    params: { lang }
-  }));
+  return Object.keys(languages).map(lang => ({ params: { lang } }));
 }
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-let directoryItems: DirectoryItem[] = [];
-let posts: BlogPost[] = [];
-let error = false;
-
-try {
-  [directoryItems, posts] = await Promise.all([
-    getDirectoryItems(lang),
-    getBlogPosts(lang)
-  ]);
-} catch (e) {
-  console.error('Error fetching data:', e);
-  error = true;
-}
-
-if (error) {
-  return Astro.redirect(`/${lang}/error`);
-}
-
-const faqs = [
-  {
-    question: t('faq.q1'),
-    answer: t('faq.a1')
-  },
-  {
-    question: t('faq.q2'),
-    answer: t('faq.a2')
-  },
-  {
-    question: t('faq.q3'),
-    answer: t('faq.a3')
-  }
-];
+const { data: directoryItems = [] } = await supabase
+  .from('directory_items')
+  .select('*')
+  .eq('lang', lang)
+  .order('created_at', { ascending: false })
+  .limit(6);
 ---
 
 <Layout title={t('hero.title')}>
@@ -79,25 +53,21 @@ const faqs = [
         </a>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {directoryItems.length > 0 ? (
-          directoryItems.slice(0, 6).map((item) => (
-            <DirectoryItemCard
-              title={item.title}
-              description={item.description}
-              tags={item.tags || []}
-              id={item.id}
-              lang={lang}
-            />
-          ))
-        ) : (
-          <p class="col-span-full text-center text-gray-500">
-            {t('directory.noItems')}
-          </p>
-        )}
+        {directoryItems.map((item) => (
+          <DirectoryItemCard
+            title={item.title}
+            description={item.description}
+            tags={item.tags}
+            id={item.id}
+            lang={lang}
+          />
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- Rest of the template remains the same -->
+  <SubmitSection />
+  <FAQSection />
+  <BlogSection />
   <ListingModal />
 </Layout>
